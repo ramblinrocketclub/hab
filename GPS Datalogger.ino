@@ -26,7 +26,8 @@ void setup() {
   }
   Serial.println("SD card initialized.");
 
-  SD.open("datalog.txt", FILE_WRITE);
+  File log = SD.open("datalog.txt", FILE_WRITE);
+
   log.println("Note: All times are UTC.");
   log.println("--TIME--|--LAT--|--LONG--|--ALT--");
   log.close();
@@ -59,7 +60,8 @@ static void floatToStr(String & str, float val, char width, unsigned char precis
 }
 
 static void logGPSInfo() {
-  log.open("datalog.txt", FILE_WRITE);
+  
+  File log = SD.open("datalog.txt", FILE_WRITE);
 
   if (gps.location.isValid()) {
     double lat = gps.location.lat();
@@ -113,7 +115,7 @@ static String formatTime(TinyGPSTime &t) {
 }
 
 static void logTemperature() {
-  SD.open("datalog.txt", FILE_WRITE);
+  File log = SD.open("datalog.txt", FILE_WRITE);
 
   digitalWrite(TempPin, HIGH);
   int reading = analogRead(A0);
