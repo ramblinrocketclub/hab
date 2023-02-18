@@ -128,6 +128,7 @@ static void logTemperature() {
   log.println();
 
   log.close();
+  
 }
 
 
