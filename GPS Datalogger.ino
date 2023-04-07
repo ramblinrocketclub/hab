@@ -11,6 +11,7 @@ bool debug = true;
 static const int GPSrx = 4, GPStx = 3;
 static const uint32_t GPSBaud = 9600;
 static const int TempPin = 2;
+static const int LM60TempPin = 6;
 
 const int SDcs = 5;
 
@@ -25,6 +26,8 @@ int status;
 double temp;
 double hum;
 int valid;
+int LM60read;
+double extTemp;
 
 void setup() {
   Serial.begin(115200);
@@ -32,6 +35,8 @@ void setup() {
 
   DHT.begin();
   delay(1000);
+
+  pinMode(LM60TempPin, OUTPUT);
 
   if (!SD.begin(SDcs)) {
     Serial.println("Card failed, or not present");
@@ -41,7 +46,7 @@ void setup() {
 
   File log = SD.open("datalog.txt", FILE_WRITE);
 
-  log.println("time,valid,lat,lng,alt,temp,hum");
+  log.println("time,valid,lat,lng,alt,temp,hum,LM60temp");
   log.close();
 }
 
@@ -73,6 +78,14 @@ static void logGPSInfo() {
   temp = DHT.getTemperature();
   hum = DHT.getHumidity();
 
+  digitalWrite(LM60TempPin, HIGH);
+  analogReference(INTERNAL);
+  analogRead(A0);
+  delay(10);  
+  LM60read = analogRead(A0);
+  digitalWrite(LM60TempPin, LOW);
+
+  extTemp = ((1100. * LM60read / 1023.) - 424) / 6.25;
 
 
   if (gps.location.isValid()) {
@@ -94,6 +107,8 @@ static void logGPSInfo() {
   log.print(temp, 1);
   log.print(",");
   log.print(hum, 1);
+  log.print(",");
+  log.print(extTemp, 1);
   log.println();
   log.close();
 }
@@ -114,6 +129,8 @@ static void printDebug() {
   Serial.print(temp, 1);
   Serial.print(",");
   Serial.print(hum, 1);
+  Serial.print(",");
+  Serial.print(extTemp, 1);
   Serial.println();
 }
 
